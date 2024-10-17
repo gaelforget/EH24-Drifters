@@ -8,6 +8,8 @@ if !isdefined(Main,:IndividualDisplacements)
 	f0=joinpath(p0,"worldwide","OCCA_FlowFields.jl")
 	include(f0);
 end
+γ=GridSpec("PeriodicChannel",MeshArrays.GRID_LL360) # using MeshArrays to get Grid information
+Γ=GridLoad(γ;option="full")
 
 # Ocean Circulation setup
 
@@ -19,6 +21,11 @@ step_forward! =∫! #integrate over time
 
 # Southern Atlantic
 nf=10*1000; lo=(-40.0,30.0); la=(-6.0,-6.0); level=2.5
+#basins=demo.ocean_basins()
+#AtlExt=demo.extended_basin(basins,:Atl)
+#IndExt=demo.extended_basin(basins,:Ind)
+#mymask=AtlExt .* (Γ.XC .> -40.0) .* (Γ.XC .<=30.0) .* (Γ.YC .< -6.0) .* ( Γ.hFacC[:,1] .> 0.0 )
+
 df=OCCA_FlowFields.initial_positions(G, nf, lo, la, level)
 I=Individuals(P,df.x,df.y,df.z,df.f,(🔴=rec,🔧=proc, 𝐷=D))
 T=(0.0,10*10*86400.0)
@@ -54,9 +61,9 @@ function myplot1(I::Individuals)
     axislegend(a)
     return fig
 end
-myplot1(I)
-#fig = myplot1(I)
-#save("/Users/yysong/Desktop/study/ECCO-202410/figures/mask_test1.png",fig)
+#myplot1(I)
+fig = myplot1(I)
+save("/Users/yysong/Desktop/study/ECCO-202410/figures/mask_test1.png",fig)
 
 # visulation 2
 
@@ -65,8 +72,7 @@ myplot1(I)
 
 Plot the initial and final positions as scatter plot in `lon,lat` or `x,y` plane.
 """
-γ=GridSpec("PeriodicChannel",MeshArrays.GRID_LL360) # using MeshArrays to get Grid information
-Γ=GridLoad(γ;option="full")
+
 lndid = findall(Γ.hFacC[1,1].==0); # find indices of all positions of land
 function myplot2(I::Individuals)
 	🔴_by_t = IndividualDisplacements.DataFrames.groupby(I.🔴, :t)
@@ -75,8 +81,10 @@ function myplot2(I::Individuals)
     a = Axis(fig[1, 1],xlabel="longitude",ylabel="latitude")	
     
     scatter!(a,lon180.(🔴_by_t[1].lon),🔴_by_t[1].lat,color=:green2,markersize=4,label="initial positions") # use lon180 to convert longitude range
-    scatter!(a,lon180.(🔴_by_t[end].lon),🔴_by_t[end].lat,color=:red,markersize=4,label="final positions") 
-    scatter!(a,lon180.(Γ.XC[1,1][lndid]),Γ.YC[1,1][lndid],color=:white,markersize=7) # scatter the land background
+    sca = scatter!(a,lon180.(🔴_by_t[end].lon),🔴_by_t[end].lat,color=🔴_by_t[end].z,markersize=4, colormap = :plasma)
+    Colorbar(fig[1, 2], sca; label = "Depth (m)")
+#   scatter!(a,lon180.(🔴_by_t[end].lon),🔴_by_t[end].lat,color=:red,markersize=4,label="final positions") 
+    scatter!(a,lon180.(Γ.XC[1,1][lndid]),Γ.YC[1,1][lndid],color=:white,markersize=10) # scatter the land background
 
     xlims!(a,lon_p)
     ylims!(a,lat_p)
@@ -84,4 +92,24 @@ function myplot2(I::Individuals)
     return fig
 end
 myplot2(I)
-    
+
+
+# plot region we focus on using heatmap
+msks1=Γ.hFacC[:,1]*(Γ.XC.>0.0)*(Γ.XC.<40.0)*(Γ.YC.>-30.0)*(Γ.YC.<30.0)
+msks2=Γ.hFacC[:,1]*(Γ.XC.>-70.0+360)*(Γ.XC.<0.0+360)*(Γ.YC.>-30.0)*(Γ.YC.<30.0)
+msks = msks1+msks2
+cmap = [:white, :transparent]
+#println(lndid)
+fig=Figure(size = (600, 400))
+    a = Axis(fig[1, 1],xlabel="longitude",ylabel="latitude")
+
+    XC=circshift(Γ.XC[1,1],(-180,0)); XC[XC.>180].-=360
+    YC=circshift(Γ.YC[1,1],(-180,0))
+    M=circshift(msks[1,1],(-180,0))
+    heatmap!(XC[:,1],YC[1,:],M)
+
+    xlims!(a,lon_p)
+    ylims!(a,lat_p)
+fig
+
+
