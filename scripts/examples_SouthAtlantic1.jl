@@ -28,8 +28,13 @@ nf=10*1000; lo=(-40.0,30.0); la=(-6.0,-6.0); level=2.5
 
 df=OCCA_FlowFields.initial_positions(G, nf, lo, la, level)
 I=Individuals(P,df.x,df.y,df.z,df.f,(🔴=rec,🔧=proc, 𝐷=D))
-T=(0.0,10*10*86400.0)
-step_forward!(I,T)
+#T=(0.0,10*10*86400.0) #use this for only intial and final positon of particles
+#step_forward!(I,T)
+
+for i = 1:50 #use this to get multiple positons of particles
+    T=(0.0,i*5*86400.0)
+    step_forward!(I,T)
+end
 
 # Now we have two ways to add land background. Please try both ways and choose the one you like.
 # I recommend the second way.
@@ -113,3 +118,45 @@ fig=Figure(size = (600, 400))
 fig
 
 
+#add movie plotting package
+using Pkg
+Pkg.add.(["GLMakie"])
+using GLMakie
+
+# visulation 3
+
+"""
+Plot the initial and final positions as scatter plot in `lon,lat` or `x,y` plane.
+"""
+
+
+🔴_by_t = IndividualDisplacements.DataFrames.groupby(I.🔴, :t)
+
+set_theme!(theme_black())
+
+time=Observable(10)
+
+lon = @lift(vcat([🔴_by_t[$time-t+1].lon for t in 1:10]...).-360)#changing to convert lon range in a way that works with observable
+lat = @lift(vcat([🔴_by_t[$time-t+1].lat for t in 1:10]...)) #can change 3 for more particles
+  z = @lift(vcat([🔴_by_t[$time-t+1].z for t in 1:10]...))
+
+    f=Figure(size = (600, 400))
+    a = Axis(f[1, 1],xlabel="longitude",ylabel="latitude")	
+    
+    scatter!(a,lon,lat,color=:green2,markersize=2) # use lon180 to convert longitude range
+    sca = scatter!(a,lon,lat,color=z,markersize=2, colormap = :plasma)
+    Colorbar(fig[1, 2], sca; label = "Depth (m)")
+    scatter!(a,lon180.(🔴_by_t[1].lon),🔴_by_t[1].lat,color=:green2,markersize=4,label="initial positions") #scatter initial position
+    scatter!(a,lon180.(Γ.XC[1,1][lndid]),Γ.YC[1,1][lndid],color=:white,markersize=10) # scatter the land background
+
+    xlims!(a,lon_p)
+    ylims!(a,lat_p)
+    axislegend(a)
+
+framerate = 30
+timestamps = 10:51 #change for number of timesteps
+
+record(f, "/Users/cpimm/Desktop/time_animation2.mp4", timestamps;
+        framerate = framerate) do t
+    time[] = t
+end
