@@ -137,8 +137,8 @@ set_theme!(theme_black())
 time=Observable(10)
 
 lon = @lift(vcat([lon180.(🔴_by_t[$time-t+1].lon) for t in 1:3]...))#changing to convert lon range in a way that works with observable
-lat = @lift(vcat([🔴_by_t[$time-t+1].lat for t in 1:10]...)) #can change 3 for more particles
-  z = @lift(vcat([🔴_by_t[$time-t+1].z for t in 1:10]...))
+lat = @lift(vcat([🔴_by_t[$time-t+1].lat for t in 1:3]...)) #can change 3 for more particles
+  z = @lift(vcat([🔴_by_t[$time-t+1].z for t in 1:3]...))
 
     f=Figure(size = (600, 400))
     a = Axis(f[1, 1],xlabel="longitude",ylabel="latitude")	
@@ -154,7 +154,7 @@ lat = @lift(vcat([🔴_by_t[$time-t+1].lat for t in 1:10]...)) #can change 3 for
     axislegend(a)
 
 framerate = 20
-timestamps = 10:51 #change for number of timesteps
+timestamps = 3:51 #change for number of timesteps
 
 record(f, "/Users/cpimm/Desktop/time_animation2.mp4", timestamps;
         framerate = framerate) do t
