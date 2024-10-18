@@ -13,7 +13,7 @@ end
 
 # Ocean Circulation setup
 
-P,D=OCCA_FlowFields.setup(nmax=5) #parameters, diagnostics
+P,D=OCCA_FlowFields.setup(backward_in_time=false) #backward_in_time = change true/false depending on if you want to fun forward or backward, namx=Inf by default, nmax=5 for small simulations
 G=D.Γ #grid parameters
 rec=OCCA_FlowFields.custom🔴 #recorder
 proc=OCCA_FlowFields.custom🔧 #processor
@@ -126,7 +126,7 @@ using GLMakie
 # visulation 3
 
 """
-Plot the initial and final positions as scatter plot in `lon,lat` or `x,y` plane.
+Plot all positions over time as scatter plot in `lon,lat` or `x,y` plane incrementally in movie.
 """
 
 
