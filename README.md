@@ -13,7 +13,7 @@ List all participants on the project. Here is a good space to share your persona
 | Ciara Pimm | I want to learn specific python libraries for working with these data  | I can help with understanding our dataset,  | Team Member |
 | Yuanyuan Song |  |  | Team Member |
 | Kylie Kinne |  |  | Team Member |
-| Gael Forget | Apply IndividualDisplacements.jl | Julia, ECCO, OCCA | Team Member |
+| Gael Forget | Apply and extend IndividualDisplacements.jl | Julia, ECCO, OCCA | Team Member |
 
 ### The problem
 
