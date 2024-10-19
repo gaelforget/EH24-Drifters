@@ -19,8 +19,6 @@ List all participants on the project. Here is a good space to share your persona
 
 Simulate pathways of seawater that cross 6S in the Atlantic.
 
-## Data and Methods
-
 ### Data
 
 - OCCA, ECCO flow fields
