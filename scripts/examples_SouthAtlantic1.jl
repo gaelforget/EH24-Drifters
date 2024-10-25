@@ -68,7 +68,7 @@ function myplot1(I::Individuals)
 end
 
 fig = myplot1(I)
-fil= joinpath(tempdir(),"mask_test1.png")
+file = joinpath(tempdir(),"mask_test1.png")
 save(file,fig)
 
 # visualisation 2
@@ -158,7 +158,7 @@ axislegend(a)
 framerate = 20
 timestamps = 3:51 #change for number of timesteps
 
-fil= joinpath(tempdir(),"time_animation2.mp4")
+file= joinpath(tempdir(),"time_animation2.mp4")
 record(f, file, timestamps;
         framerate = framerate) do t
     time[] = t
